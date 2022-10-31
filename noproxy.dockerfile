@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 ARG UID=9001
 ARG GID=9001
 ARG UNAME=ubuntu
@@ -61,16 +61,39 @@ RUN echo 'path-include=/usr/share/locale/ja/LC_MESSAGES/*.mo' > /etc/dpkg/dpkg.c
         lsb-release \
         gnupg
 
-RUN sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+#RUN sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+RUN sudo apt install software-properties-common
+RUN sudo add-apt-repository universe
+
+RUN sudo apt update && sudo apt install curl gnupg lsb-release
+RUN sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
 
 RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-RUN apt-get update && apt-get install -y \
-        ros-melodic-desktop-full \
-        python-rosdep \
-        python-rosinstall \
-        python-rosinstall-generator \
-        python-wstool \
-        htop
+RUN sudo apt update && sudo apt install -y \
+  build-essential \
+  cmake \
+  git \
+  python3-colcon-common-extensions \
+  python3-flake8 \
+  python3-flake8-docstrings \
+  python3-pip \
+  python3-pytest \
+  python3-pytest-cov \
+  python3-rosdep \
+  python3-setuptools \
+  python3-vcstool \
+  wget \
+  htop
+  
+# RUN apt-get update && apt-get install -y \
+#         ros-melodic-desktop-full \
+#         python-rosdep \
+#         python-rosinstall \
+#         python-rosinstall-generator \
+#         python-wstool \
+#         htop
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y \
